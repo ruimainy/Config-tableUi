@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta charset="utf-8"> 
+    <link href="css/Site.css" rel="stylesheet" />
+    <link href="css/idb.table.css" rel="stylesheet" />
+    <script src="js/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="js/idb.core.js" type="text/javascript"></script>
+    <script src="js/idb.table.js" type="text/javascript"></script>
+</head>
+<body style="background: #fff;">
+    <div id="test_root">
+    </div>
+    <script type="text/javascript">
+        var iTable = null;
+        var xxx = {
+            "Data": [{
+                "EmployeeId": "123",
+                "DisplayName": "DisplayName1",
+                "BUName": "BUName1",
+                "UserState": 2
+
+            }, {
+                "EmployeeId": "456",
+                "DisplayName": "DisplayName2",
+                "BUName": "BUName2",
+                "UserState": 2
+
+            }, {
+                "EmployeeId": "789",
+                "DisplayName": "DisplayName3",
+                "BUName": "BUName3",
+                "UserState": 1
+
+            }, {
+                "EmployeeId": "000",
+                "DisplayName": "DisplayName4",
+                "BUName": "BUName4",
+                "UserState": 1
+            }],
+            "Total":4
+        };
+
+        function StatusFn(t) {
+            return (t == 2) ? '已锁定' : '未锁定';
+        }
+
+        function unLockBtn(t) {
+            return  (t.UserState == 2) ? '解锁' : '锁定';
+        }
+
+        function pageNumFn(index, pageSize) {
+            $.ajax({                
+                url: String.format('/auth/GetPagedLockedUsers?page={0}&pageSize={1}', index, pageSize),
+                dataType: 'json',
+                success: function (d) {
+                   //iTable.addData(index, d.Data,true);
+                }
+            });
+        }
+
+        $(function() {
+            var linkType = {
+                _text: 1,
+                _img: 2
+            };
+            var config = {
+                Titles: [
+                    { title: '员工ID', field: 'EmployeeId' },
+                    { title: '姓名', field: 'DisplayName' },
+                    { title: '部门', field: 'BUName' },
+                    { title: '状态', field: 'UserState', cellFn: StatusFn },
+                    { title: '操作', cellFn: unLockBtn }
+                ],
+                schema:
+                {
+                    data: 'Data',
+                    total:'Total'
+                },
+                pageNum: {
+                    indexChangeCb: pageNumFn,
+                    pageSize:2
+                },
+                expand:
+                {
+                    title: '详情',
+                    type: linkType._img,
+                    text: "展开",
+                    iconUrlOpen: 'Library/idb/images/openUpIcon_1.jpg',
+                    iconUrlClose: 'Library/idb/images/openUpIcon_2.jpg',
+                    expandDiv: createExpandDiv
+                },
+                checkable: {
+                    c_class: 'chkClass',
+                    title:''
+                }
+            };
+
+            function createExpandDiv(n) {
+                //测试成功
+                var $tableDiv = $('<div></div>').html("");
+                $('<div></div>').html("韩迎龙" + n.EmployeeId).appendTo($tableDiv);
+                return $tableDiv;
+            }
+
+            iTable = $("#test_root").idb_Table(config);
+
+            iTable.setData(1, xxx);
+        });
+    </script>
+</body>
+</html>
